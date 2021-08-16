@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import noteService from '../services/notes'
 
 const PersonForm = ({ persons, setPersons, filterAction }) => {
   const [ newName, setNewName ] = useState('')
@@ -23,17 +24,38 @@ const PersonForm = ({ persons, setPersons, filterAction }) => {
 		if (!nameAlreadyAdded()) {
 			if (fieldsNotEmpty()) {
 				const oldPersons = [...persons];
-				const newPerson = {name: newName, number: newNumber}		
+				const newPerson = {name: newName, number: newNumber, id: persons.length + 1}		
 				
-				const newPersons = oldPersons.concat(newPerson)
-				setPersons(newPersons)		
-				filterAction(newPersons)
-				alert(`${newName} added to phonebook.`)		
+				noteService
+					.create(newPerson)
+					.then(returnedPerson => {
+						const newPersons = oldPersons.concat(newPerson)
+						setPersons(newPersons)		
+						filterAction(newPersons)
+						setNewName('')
+						setNewNumber('')
+						alert(`${newName} added to phonebook.`)							
+					})
 			} else {
 				alert('Please fill up all fields.')
 			}	
 		} else {
-			alert(`${newName} is already added to the phonebook.`)
+			if (window.confirm(`${newName} is already added to the phonebook, replace the old number with a new one?`)) {
+				const personToBeUpdated = persons.find(person => person.name === newName)
+				const updatedPerson = {...personToBeUpdated, number: newNumber}
+				
+				noteService
+					.update(updatedPerson.id, updatedPerson)
+					.then(returnedPerson => {
+						const newPersons = persons.map(person => person.id === returnedPerson.id ? returnedPerson : person)
+						setPersons(newPersons)
+						filterAction(newPersons)
+					
+						setNewName('')
+						setNewNumber('')
+						alert(`${returnedPerson.name}'s number successfully updated.`)				
+					})
+			}
 		}
 	}  
   
