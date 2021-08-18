@@ -1,7 +1,7 @@
 import React from 'react'
 import DeleteButton from './DeleteButton'
 
-const Persons = ({ persons }) => {
+const Persons = ({ persons, setPersons, setNotificationMessage, setNotificationClass, filterAction }) => {
 	return (
 		<div>
       <dl>
@@ -10,7 +10,14 @@ const Persons = ({ persons }) => {
       			<dt 
       				key={person.id}>
       					{person.name} {person.number}
-      					<DeleteButton person={person} />
+      					<DeleteButton
+      				 	 	person={person} 
+      				 	 	persons={persons}
+      				 	 	setPersons={setPersons}
+									setNotificationMessage={setNotificationMessage}
+ 									setNotificationClass={setNotificationClass}  
+ 									filterAction={filterAction}				 	 
+      				 	/>
       			</dt>
       		)
       	})}

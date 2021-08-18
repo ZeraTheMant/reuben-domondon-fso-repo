@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import noteService from '../services/notes'
 
-const PersonForm = ({ persons, setPersons, filterAction }) => {
+const PersonForm = ({ persons, setPersons, filterAction, setNotificationMessage, setNotificationClass }) => {
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')  
   
@@ -18,26 +18,33 @@ const PersonForm = ({ persons, setPersons, filterAction }) => {
 		return fieldNotEmpty(name) && fieldNotEmpty(number)
 	}
 
+	const getNewId = () => {
+		const ids = persons.map(person => person.id)
+		return Math.max(...ids) + 1
+	}
+
 	const addPerson = (e) => {
 		e.preventDefault()
 		
 		if (!nameAlreadyAdded()) {
 			if (fieldsNotEmpty()) {
 				const oldPersons = [...persons];
-				const newPerson = {name: newName, number: newNumber, id: persons.length + 1}		
-				
+				const newPerson = {name: newName, number: newNumber, id: getNewId()}		
+
 				noteService
 					.create(newPerson)
 					.then(returnedPerson => {
-						const newPersons = oldPersons.concat(newPerson)
+						const newPersons = oldPersons.concat(newPerson)			
 						setPersons(newPersons)		
 						filterAction(newPersons)
 						setNewName('')
 						setNewNumber('')
-						alert(`${newName} added to phonebook.`)							
+						setNotificationMessage(`${newName} added to phonebook.`)				
+						setNotificationClass('success')										
 					})
 			} else {
-				alert('Please fill up all fields.')
+				setNotificationMessage('Please fill up all fields.')
+				setNotificationClass('error')					
 			}	
 		} else {
 			if (window.confirm(`${newName} is already added to the phonebook, replace the old number with a new one?`)) {
@@ -53,7 +60,8 @@ const PersonForm = ({ persons, setPersons, filterAction }) => {
 					
 						setNewName('')
 						setNewNumber('')
-						alert(`${returnedPerson.name}'s number successfully updated.`)				
+						setNotificationMessage(`${returnedPerson.name}'s number successfully updated.`)			
+						setNotificationClass('success')	
 					})
 			}
 		}
