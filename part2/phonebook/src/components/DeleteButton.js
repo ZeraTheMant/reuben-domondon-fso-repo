@@ -9,11 +9,17 @@ const DeleteButton = ({ person, persons, setPersons, setNotificationMessage, set
 			noteService
 				.delete_data(person.id)
 				.then(result => {
-					const newPersons = persons.filter(person_inner => person_inner.id !== person.id)
-					setPersons(newPersons)
-					filterAction(newPersons)
 					setNotificationMessage(`${deletedPerson_name} deleted from phonebook.`)		
 					setNotificationClass('error')					
+				})
+				.catch(error => {
+					setNotificationMessage(`Information of ${deletedPerson_name} has already been removed from server.`)		
+					setNotificationClass('error')						
+				})
+				.finally(() => {
+					const newPersons = persons.filter(person_inner => person_inner.id !== person.id)
+					setPersons(newPersons)
+					filterAction(newPersons)				
 				})
 		}
 	}
